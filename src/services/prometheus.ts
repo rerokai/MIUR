@@ -1,6 +1,6 @@
 import { MetricPoint } from '../constants/types'
 
-const DEFAULT_STEP = '30s'
+const DEFAULT_STEP = '15s'
 
 export const queryRange = async (
   baseUrl: string,

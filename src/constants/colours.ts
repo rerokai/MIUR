@@ -1,11 +1,11 @@
 export const colors = {
   bg: {
-    primary: '#0D0D0F',
-    card: '#151518',
+    primary: '#0D0D0D',
+    card: '#131315',
     elevated: '#1A1A1E',
     inner: '#1E1E22',
   },
-  accent: '#00F6FF',
+  accent: '#00FFF2',
   semantic: {
     threat: '#FF4D4D',
     warning: '#F5A623',

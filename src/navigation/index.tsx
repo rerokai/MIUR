@@ -4,18 +4,17 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { View, Text } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { colors } from '../constants/colours'
+import { MainScreen } from '../screens/MainScreen'
+import { MapScreen } from '../screens/MapScreen'
+import { HistoryScreen } from '../screens/HistoryScreen'
+import { AnalyticsScreen } from '../screens/AnalyticsScreen'
+import { SettingsScreen } from '../screens/SettingsScreen'
 
 const PlaceholderScreen = ({ name }: { name: string }) => (
   <View style={{ flex: 1, backgroundColor: colors.bg.primary, alignItems: 'center', justifyContent: 'center' }}>
     <Text style={{ color: colors.text.primary, fontSize: 18 }}>{name}</Text>
   </View>
 )
-
-const MainScreen = () => <PlaceholderScreen name="Overview" />
-const MapScreen = () => <PlaceholderScreen name="Map" />
-const HistoryScreen = () => <PlaceholderScreen name="History" />
-const AnalyticsScreen = () => <PlaceholderScreen name="Analytics" />
-const SettingsScreen = () => <PlaceholderScreen name="Settings" />
 
 const Tab = createBottomTabNavigator()
 

@@ -14,7 +14,7 @@ export const StabilityHeader = React.memo(({ stability }: StabilityHeaderProps) 
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingHorizontal: 22,
+      paddingHorizontal: 18,
       paddingTop: 60,
       paddingBottom: 16,
     }}>

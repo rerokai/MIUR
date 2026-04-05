@@ -8,6 +8,7 @@ import { InsightCard } from '../components/InsightCard'
 import { GroupBlock } from '../components/GroupBlock'
 import { CountersBlock } from '../components/CountersBlock'
 import { MetricChart } from '../components/MetricChart'
+import { ServerMiniChart } from '../components/ServerMiniChart'
 
 export const MainScreen = () => {
   const { cpu, ram, disk, loading, error } = usePrometheus()
@@ -65,6 +66,12 @@ export const MainScreen = () => {
   const stableCount = anomalyType === null ? 1 : 0
   const unstableCount = anomalyType !== null ? 1 : 0
 
+  const getScoreColor = (score: number) => {
+    if (score < 50) return colors.semantic.threat
+    if (score < 75) return colors.semantic.warning
+    return colors.semantic.stable
+  }
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.bg.primary }}
@@ -90,7 +97,7 @@ export const MainScreen = () => {
             backgroundColor: colors.bg.card,
             marginHorizontal: 14,
             borderRadius: 2,
-            padding: 10,
+            paddingVertical: 10,
             marginBottom: 14,
             borderWidth: 0.5,
             borderColor: colors.border,
@@ -99,16 +106,29 @@ export const MainScreen = () => {
             <MetricChart
               data={cpu}
               height={160}
-                          />
+            />
           </View>
 
           <InsightCard insights={insights} />
 
-          <GroupBlock
-            name="PROD"
-            score={healthScore}
-            servers={servers}
-          />
+          <View style={{ marginHorizontal: 14, marginBottom: 14 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <Text style={{ fontSize: 15, fontWeight: '500', color: getScoreColor(healthScore) }}>
+                PROD
+              </Text>
+              <Text style={{ fontSize: 15, fontWeight: '500', color: getScoreColor(healthScore) }}>
+                {healthScore}%
+              </Text>
+            </View>
+
+            <ServerMiniChart
+              name="prod-web-01"
+              healthScore={healthScore}
+              cpu={cpu}
+              ram={ram}
+              disk={disk}
+            />
+          </View>
 
           <CountersBlock
             stable={stableCount}

@@ -27,3 +27,9 @@ export interface Anomaly {
   startedAt: number
   resolvedAt?: number
 }
+
+export interface Group {
+  id: string
+  name: string
+  serverIds: string[]
+}

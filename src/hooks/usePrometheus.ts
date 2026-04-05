@@ -7,6 +7,11 @@ interface ServerMetrics {
   cpu: MetricPoint[]
   ram: MetricPoint[]
   disk: MetricPoint[]
+  ramUsedGB: MetricPoint[]
+  loadAvg: MetricPoint[]
+  uptime: MetricPoint[]
+  openConnections: MetricPoint[]
+  processes: MetricPoint[]
   loading: boolean
   error: string | null
 }
@@ -19,6 +24,11 @@ export const usePrometheus = (
     cpu: [],
     ram: [],
     disk: [],
+    ramUsedGB: [],
+    loadAvg: [],
+    uptime: [],
+    openConnections: [],
+    processes: [],
     loading: true,
     error: null,
   })
@@ -26,28 +36,32 @@ export const usePrometheus = (
   const isFirstLoad = useRef(true)
 
   useEffect(() => {
+    isFirstLoad.current = true
+    setMetrics(prev => ({ ...prev, loading: true }))
+
     const fetchMetrics = async () => {
       const end = Math.floor(Date.now() / 1000)
       const start = end - rangeHours * 3600
 
-      // При первой загрузке показываем loading
-      // При последующих — тихо обновляем данные без loading
       if (isFirstLoad.current) {
         setMetrics(prev => ({ ...prev, loading: true, error: null }))
       }
 
       try {
-        const [cpu, ram, disk] = await Promise.all([
+        const [cpu, ram, disk, ramUsedGB, loadAvg, uptime, openConnections, processes] = await Promise.all([
           queryRange(serverUrl, queries.cpuUsage, start, end),
           queryRange(serverUrl, queries.ramUsage, start, end),
           queryRange(serverUrl, queries.diskUsage, start, end),
+          queryRange(serverUrl, queries.ramUsedGB, start, end),
+          queryRange(serverUrl, queries.loadAvg1, start, end),
+          queryRange(serverUrl, queries.uptime, start, end),
+          queryRange(serverUrl, queries.openConnections, start, end),
+          queryRange(serverUrl, queries.processes, start, end),
         ])
 
         setMetrics(prev => ({
           ...prev,
-          cpu,
-          ram,
-          disk,
+          cpu, ram, disk, ramUsedGB, loadAvg, uptime, openConnections, processes,
           loading: false,
           error: null,
         }))

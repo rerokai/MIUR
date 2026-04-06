@@ -3,11 +3,11 @@ import React, { useState, useCallback } from 'react'
 import { ScrollView, View, Text, TouchableOpacity, Switch, TextInput, Alert } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
 import { useServers } from '../hooks/useServers'
 import { checkConnection } from '../services/prometheus'
 import { Server } from '../constants/types'
 import { useGroups } from '../hooks/useGroups'
+import { useTheme } from '../constants/ThemeContext'
 
 type UserRole = 'sre' | 'developer' | 'manager'
 type ServerProfile = 'web' | 'db' | 'worker'
@@ -25,6 +25,7 @@ const PROFILES: { id: ServerProfile; label: string; desc: string; icon: string }
 ]
 
 export const SettingsScreen = () => {
+  const { isDark, toggleTheme } = useTheme()
   const { servers, addServer, removeServer } = useServers()
   const { groups, addGroup, removeGroup, toggleServerInGroup } = useGroups()
   const [addingGroup, setAddingGroup] = useState(false)
@@ -42,8 +43,6 @@ export const SettingsScreen = () => {
   const [newName, setNewName] = useState('')
   const [newUrl, setNewUrl] = useState('')
   const [connStatus, setConnStatus] = useState<'idle' | 'checking' | 'ok' | 'err'>('idle')
-
-
 
   const handleCheckConnection = useCallback(async () => {
     if (!newUrl) return
@@ -189,6 +188,7 @@ export const SettingsScreen = () => {
           <Text style={{ fontSize: 13, color: colors.accent, fontWeight: '500' }}>ADD SERVER</Text>
         </TouchableOpacity>
       </View>
+
       {/* GROUPS */}
       <Text style={{ fontSize: 9, color: colors.text.hint, letterSpacing: 1, paddingHorizontal: 16, marginBottom: 8 }}>GROUPS</Text>
       <View style={{
@@ -392,7 +392,6 @@ export const SettingsScreen = () => {
         borderRadius: 2, borderWidth: 0.5, borderColor: colors.border,
         marginBottom: 16, overflow: 'hidden',
       }}>
-        {/* Threshold slider */}
         <View style={{ padding: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
             <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary }}>Anomaly threshold</Text>
@@ -427,8 +426,8 @@ export const SettingsScreen = () => {
         </View>
 
         {[
-          { label: 'Anomaly threshold', desc: 'Отслеживать медленный рост', value: silentDegradation, set: setSilentDegradation },
-          { label: 'Корреляция', desc: 'Искать синхронные аномалии', value: correlations, set: setCorrelations },
+          { label: 'Silent degradation', desc: 'Отслеживать медленный рост', value: silentDegradation, set: setSilentDegradation },
+          { label: 'Correlations', desc: 'Искать синхронные аномалии', value: correlations, set: setCorrelations },
         ].map(item => (
           <View key={item.label} style={{
             flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -457,8 +456,8 @@ export const SettingsScreen = () => {
         marginBottom: 16, overflow: 'hidden',
       }}>
         {[
-          { label: 'Показывать baseline', desc: 'Пунктир на графиках метрик', value: showBaseline, set: setShowBaseline },
-          { label: 'Зона отклонения', desc: 'Заливка между линией и baseline', value: showDeviation, set: setShowDeviation },
+          { label: 'Show baseline', desc: 'Пунктир на графиках метрик', value: showBaseline, set: setShowBaseline },
+          { label: 'Deviation zone', desc: 'Заливка между линией и baseline', value: showDeviation, set: setShowDeviation },
         ].map(item => (
           <View key={item.label} style={{
             flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -479,7 +478,34 @@ export const SettingsScreen = () => {
         ))}
       </View>
 
-      
+      {/* APPEARANCE */}
+      <Text style={{ fontSize: 9, color: colors.text.hint, letterSpacing: 1, paddingHorizontal: 16, marginBottom: 8 }}>APPEARANCE</Text>
+      <View style={{
+        backgroundColor: colors.bg.card, marginHorizontal: 16,
+        borderRadius: 2, borderWidth: 0.5, borderColor: colors.border,
+        marginBottom: 16, overflow: 'hidden',
+      }}>
+        <View style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+          padding: 14,
+        }}>
+          <View style={{ flex: 1, marginRight: 12 }}>
+            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary }}>
+              {isDark ? 'Dark mode' : 'Light mode'}
+            </Text>
+            <Text style={{ fontSize: 11, color: colors.text.hint, marginTop: 2 }}>
+              Switch theme
+            </Text>
+          </View>
+          <Switch
+            value={isDark}
+            onValueChange={toggleTheme}
+            trackColor={{ false: colors.bg.elevated, true: `${colors.accent}22` }}
+            thumbColor={isDark ? `${colors.accent}99` : colors.text.ghost}
+            style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+          />
+        </View>
+      </View>
 
       {/* NOTIFICATIONS */}
       <Text style={{ fontSize: 9, color: colors.text.hint, letterSpacing: 1, paddingHorizontal: 16, marginBottom: 8 }}>NOTIFICATIONS</Text>
@@ -493,7 +519,7 @@ export const SettingsScreen = () => {
           padding: 14, borderBottomWidth: 0.5, borderBottomColor: colors.border,
         }}>
           <View style={{ flex: 1, marginRight: 12 }}>
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary }}>Push-уведомления</Text>
+            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary }}>Push notifications</Text>
             <Text style={{ fontSize: 11, color: colors.text.hint, marginTop: 2 }}>При критических аномалиях</Text>
           </View>
           <Switch
@@ -509,7 +535,7 @@ export const SettingsScreen = () => {
           padding: 14,
         }}>
           <View>
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary }}>Порог срабатывания</Text>
+            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary }}>Alert threshold</Text>
             <Text style={{ fontSize: 11, color: colors.text.hint, marginTop: 2 }}>Минимальный уровень для уведомления</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -518,11 +544,17 @@ export const SettingsScreen = () => {
           </View>
         </View>
       </View>
-      <View style={{ backgroundColor: colors.bg.card, marginHorizontal: 16,
+
+      <View style={{
+        backgroundColor: colors.bg.card, marginHorizontal: 16,
         borderRadius: 2, borderWidth: 0.5, borderColor: colors.border,
-        marginBottom: 16, overflow: 'hidden', }}>
-        <TouchableOpacity onPress={() => AsyncStorage.clear()}>
-          <Text style={{ fontSize: 12, color: colors.text.primary }}>Reset onboarding</Text>
+        marginBottom: 16, overflow: 'hidden',
+      }}>
+        <TouchableOpacity
+          onPress={() => AsyncStorage.clear()}
+          style={{ padding: 14 }}
+        >
+          <Text style={{ fontSize: 13, color: colors.semantic.threat }}>Reset onboarding</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

@@ -5,7 +5,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Feather } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
 import { MainScreen } from '../screens/MainScreen'
 import { MapScreen } from '../screens/MapScreen'
 import { HistoryScreen } from '../screens/HistoryScreen'
@@ -35,10 +34,7 @@ export type TabParamList = {
 const Tab = createBottomTabNavigator<TabParamList>()
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
-
-
 const TabNavigator = () => {
-  
   return (
     <Tab.Navigator
       initialRouteName="Main"

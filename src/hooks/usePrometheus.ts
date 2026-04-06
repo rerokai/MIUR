@@ -47,6 +47,7 @@ export const usePrometheus = (
         setMetrics(prev => ({ ...prev, loading: true, error: null }))
       }
 
+      
       try {
         const [cpu, ram, disk, ramUsedGB, loadAvg, uptime, openConnections, processes] = await Promise.all([
           queryRange(serverUrl, queries.cpuUsage, start, end),
@@ -58,6 +59,8 @@ export const usePrometheus = (
           queryRange(serverUrl, queries.openConnections, start, end),
           queryRange(serverUrl, queries.processes, start, end),
         ])
+        console.log('fetching from:', serverUrl)
+        console.log('cpu result:', cpu.length, 'points')
 
         setMetrics(prev => ({
           ...prev,
@@ -76,11 +79,13 @@ export const usePrometheus = (
       }
     }
 
+    
     fetchMetrics()
 
     const interval = setInterval(fetchMetrics, config.defaultInterval * 1000)
     return () => clearInterval(interval)
   }, [serverUrl, rangeHours])
 
+  
   return metrics
 }

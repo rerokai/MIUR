@@ -14,35 +14,39 @@ const DEFAULT_SERVERS: Server[] = [
 ]
 
 export const useServers = () => {
-  const [servers, setServers] = useState<Server[]>(DEFAULT_SERVERS)
+  const [servers, setServers] = useState<Server[]>([])
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     const load = async () => {
       try {
         const stored = await AsyncStorage.getItem('servers')
         if (stored) setServers(JSON.parse(stored))
-      } catch {}
+        else setServers(DEFAULT_SERVERS)
+      } catch {
+        setServers(DEFAULT_SERVERS)
+      } finally {
+        setLoaded(true)
+      }
     }
     load()
   }, [])
-
 
   const saveServers = async (list: Server[]) => {
     setServers(list)
     await AsyncStorage.setItem('servers', JSON.stringify(list))
   }
 
-const refresh = useCallback(async () => {
+  const refresh = useCallback(async () => {
     try {
       const stored = await AsyncStorage.getItem('servers')
       if (stored) setServers(JSON.parse(stored))
     } catch {}
   }, [])
 
-
   const addServer = (server: Server) => saveServers([...servers, server])
   const removeServer = (id: string) => saveServers(servers.filter(s => s.id !== id))
 
-  return { servers, addServer, removeServer, refresh }
+  return { servers, addServer, removeServer, refresh, loaded }
 }
 

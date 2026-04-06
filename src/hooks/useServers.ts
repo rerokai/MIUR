@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Server } from '../constants/types'
 import { config } from '../constants/config'
@@ -26,14 +26,23 @@ export const useServers = () => {
     load()
   }, [])
 
+
   const saveServers = async (list: Server[]) => {
     setServers(list)
     await AsyncStorage.setItem('servers', JSON.stringify(list))
   }
 
+const refresh = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem('servers')
+      if (stored) setServers(JSON.parse(stored))
+    } catch {}
+  }, [])
+
+
   const addServer = (server: Server) => saveServers([...servers, server])
   const removeServer = (id: string) => saveServers(servers.filter(s => s.id !== id))
 
-  return { servers, addServer, removeServer }
+  return { servers, addServer, removeServer, refresh }
 }
 

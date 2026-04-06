@@ -1,8 +1,9 @@
+import { colors } from '../constants/colours'
 import React, { useState, useMemo, useCallback } from 'react'
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import { Feather } from '@expo/vector-icons'
-import { colors } from '../constants/colours'
+
 import { usePrometheus } from '../hooks/usePrometheus'
 import { calculateBaseline, detectAnomaly, calculateHealthScore } from '../utils/analytics'
 import { RootStackParamList } from '../navigation'
@@ -13,7 +14,8 @@ type ServiceRouteProp = RouteProp<RootStackParamList, 'Service'>
 const TIME_RANGES = ['15 m', '1 h', '6 h', '24 h']
 const METRIC_TABS = ['CPU', 'RAM', 'Disk', 'Net', 'System']
 
-const getScoreColor = (score: number) => {
+
+const getScoreColor = (score: number, colors: any) => {
   if (score < 50) return colors.semantic.threat
   if (score < 75) return colors.semantic.warning
   return colors.semantic.stable
@@ -60,7 +62,7 @@ export const ServiceScreen = () => {
     })
   }, [cpu, ram, disk, anomalyType])
 
-  const scoreColor = getScoreColor(healthScore)
+  const scoreColor = getScoreColor(healthScore, colors)
 
   const currentMetricData = useMemo(() => {
     switch (activeMetric) {

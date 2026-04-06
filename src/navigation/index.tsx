@@ -1,10 +1,11 @@
+import { colors } from '../constants/colours'
 import React, { useEffect, useState } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Feather } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { colors } from '../constants/colours'
+
 import { MainScreen } from '../screens/MainScreen'
 import { MapScreen } from '../screens/MapScreen'
 import { HistoryScreen } from '../screens/HistoryScreen'
@@ -34,39 +35,45 @@ export type TabParamList = {
 const Tab = createBottomTabNavigator<TabParamList>()
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
-const TabNavigator = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarShowLabel: false,
-      tabBarStyle: {
-        backgroundColor: colors.bg.card,
-        borderTopColor: colors.border,
-        borderTopWidth: 0.5,
-        height: 70,
-        paddingBottom: 5,
-        paddingTop: 5,
-      },
-      tabBarIcon: ({ focused }) => {
-        const iconColor = focused ? colors.accent : colors.text.hint
-        const icons: Record<string, keyof typeof Feather.glyphMap> = {
-          Settings: 'sliders',
-          Map: 'grid',
-          Main: 'activity',
-          Analytics: 'bar-chart-2',
-          History: 'clock',
-        }
-        return <Feather name={icons[route.name]} size={22} color={iconColor} />
-      },
-    })}
-  >
-    <Tab.Screen name="Settings" component={SettingsScreen} />
-    <Tab.Screen name="Map" component={MapScreen} />
-    <Tab.Screen name="Main" component={MainScreen} />
-    <Tab.Screen name="Analytics" component={AnalyticsScreen} />
-    <Tab.Screen name="History" component={HistoryScreen} />
-  </Tab.Navigator>
-)
+
+
+const TabNavigator = () => {
+  
+  return (
+    <Tab.Navigator
+      initialRouteName="Main"
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: colors.bg.card,
+          borderTopColor: colors.border,
+          borderTopWidth: 0.5,
+          height: 70,
+          paddingBottom: 5,
+          paddingTop: 5,
+        },
+        tabBarIcon: ({ focused }) => {
+          const iconColor = focused ? colors.accent : colors.text.hint
+          const icons: Record<string, keyof typeof Feather.glyphMap> = {
+            Settings: 'sliders',
+            Map: 'grid',
+            Main: 'activity',
+            Analytics: 'bar-chart-2',
+            History: 'clock',
+          }
+          return <Feather name={icons[route.name]} size={22} color={iconColor} />
+        },
+      })}
+    >
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen name="Main" component={MainScreen} />
+      <Tab.Screen name="Analytics" component={AnalyticsScreen} />
+      <Tab.Screen name="History" component={HistoryScreen} />
+    </Tab.Navigator>
+  )
+}
 
 export const Navigation = () => {
   const [isOnboarded, setIsOnboarded] = useState<boolean | null>(null)

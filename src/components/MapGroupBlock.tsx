@@ -1,7 +1,8 @@
+import { colors } from '../constants/colours'
 import React, { useState, useCallback } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { Feather } from '@expo/vector-icons'
-import { colors } from '../constants/colours'
+
 import { MapServerCard } from './MapServerCard'
 import { Server } from '../constants/types'
 
@@ -19,7 +20,6 @@ export const MapGroupBlock = React.memo(({
   defaultExpanded = true,
 }: MapGroupBlockProps) => {
   const [expanded, setExpanded] = useState(defaultExpanded)
-
   const toggle = useCallback(() => setExpanded(prev => !prev), [])
 
   return (

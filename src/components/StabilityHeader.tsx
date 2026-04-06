@@ -1,6 +1,7 @@
+import { colors } from '../constants/colours'
 import React from 'react'
 import { View, Text } from 'react-native'
-import { colors } from '../constants/colours'
+
 
 interface StabilityHeaderProps {
   stability: number
@@ -8,7 +9,6 @@ interface StabilityHeaderProps {
 
 export const StabilityHeader = React.memo(({ stability }: StabilityHeaderProps) => {
   const isDegrading = stability < 75
-
   return (
     <View style={{
       flexDirection: 'row',

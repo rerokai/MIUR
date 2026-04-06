@@ -1,6 +1,7 @@
+import { colors } from '../constants/colours'
 import React from 'react'
 import { View, Text } from 'react-native'
-import { colors } from '../constants/colours'
+
 
 interface CountersBlockProps {
   stable: number

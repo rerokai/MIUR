@@ -39,7 +39,7 @@ export const queryRange = async (
       value: parseFloat(value),
     }))
   } catch (error) {
-    console.error('Prometheus query failed:', error)
+    
     return []
   }
 }

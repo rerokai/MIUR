@@ -1,6 +1,7 @@
+import { colors } from '../constants/colours'
 import React from 'react'
 import { View, Text } from 'react-native'
-import { colors } from '../constants/colours'
+
 
 interface ServerCardProps {
   name: string
@@ -10,7 +11,7 @@ interface ServerCardProps {
   disk: number | null
 }
 
-const getScoreColor = (score: number) => {
+const getScoreColor = (score: number, colors: any) => {
   if (score < 50) return colors.semantic.threat
   if (score < 75) return colors.semantic.warning
   return colors.semantic.stable
@@ -23,8 +24,9 @@ export const ServerCard = React.memo(({
   ram,
   disk,
 }: ServerCardProps) => {
-  const scoreColor = getScoreColor(healthScore)
+  const scoreColor = getScoreColor(healthScore, colors)
 
+  
   return (
     <View style={{
       backgroundColor: colors.bg.card,

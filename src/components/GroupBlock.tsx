@@ -1,6 +1,7 @@
+import { colors } from '../constants/colours'
 import React from 'react'
 import { View, Text } from 'react-native'
-import { colors } from '../constants/colours'
+
 import { ServerCard } from './ServerCard'
 
 interface GroupBlockProps {
@@ -16,14 +17,14 @@ interface GroupBlockProps {
   }[]
 }
 
-const getScoreColor = (score: number) => {
+const getScoreColor = (score: number, colors: any) => {
   if (score < 50) return colors.semantic.threat
   if (score < 75) return colors.semantic.warning
   return colors.semantic.stable
 }
 
 export const GroupBlock = React.memo(({ name, score, servers }: GroupBlockProps) => {
-  const scoreColor = getScoreColor(score)
+  const scoreColor = getScoreColor(score, colors)
 
   return (
     <View style={{ marginHorizontal: 14, marginBottom: 14 }}>
@@ -40,7 +41,6 @@ export const GroupBlock = React.memo(({ name, score, servers }: GroupBlockProps)
           {score}%
         </Text>
       </View>
-
       {servers.map(server => (
         <ServerCard
           key={server.id}

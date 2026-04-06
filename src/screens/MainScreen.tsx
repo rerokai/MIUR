@@ -1,133 +1,145 @@
-import React, { useMemo } from 'react'
-import { ScrollView, View, Text } from 'react-native'
 import { colors } from '../constants/colours'
-import { usePrometheus } from '../hooks/usePrometheus'
-import { calculateBaseline, detectAnomaly, calculateHealthScore } from '../utils/analytics'
+import React, { useMemo } from 'react'
+import { ScrollView, View, Text, TouchableOpacity } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+
+import { useServers } from '../hooks/useServers'
+import { useGroups } from '../hooks/useGroups'
+import { useAllServersHealth } from '../hooks/useAllServersHealth'
 import { StabilityHeader } from '../components/StabilityHeader'
 import { InsightCard } from '../components/InsightCard'
-import { GroupBlock } from '../components/GroupBlock'
 import { CountersBlock } from '../components/CountersBlock'
 import { MetricChart } from '../components/MetricChart'
 import { ServerMiniChart } from '../components/ServerMiniChart'
+import { RootStackParamList } from '../navigation'
+import { MultiServerChart } from '../components/MultiServerChart'
 
 export const MainScreen = () => {
-  const { cpu, ram, disk, loading, error } = usePrometheus()
+  const { servers } = useServers()
+  const { groups } = useGroups()
+  const allHealth = useAllServersHealth(servers)
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
-  const baseline = useMemo(() => calculateBaseline(cpu), [cpu])
+  const avgHealthScore = useMemo(() => {
+    const loaded = allHealth.filter(h => !h.loading && h.healthScore > 0)
+    if (loaded.length === 0) return 0
+    return Math.round(loaded.reduce((s, h) => s + h.healthScore, 0) / loaded.length)
+  }, [allHealth])
 
-  const anomalyType = useMemo(
-    () => detectAnomaly(cpu, baseline),
-    [cpu, baseline]
-  )
+  const worstGroup = useMemo(() => {
+    if (groups.length === 0) return null
+    return groups
+      .map(group => {
+        const groupHealth = allHealth.filter(h => group.serverIds.includes(h.server.id))
+        const avg = groupHealth.length > 0
+          ? groupHealth.reduce((s, h) => s + h.healthScore, 0) / groupHealth.length
+          : 100
+        return { group, avg }
+      })
+      .sort((a, b) => a.avg - b.avg)[0]?.group ?? null
+  }, [groups, allHealth])
 
-  const healthScore = useMemo(() => {
-    if (!cpu.length || !ram.length || !disk.length) return 0
-    return calculateHealthScore({
-      cpu: cpu[cpu.length - 1].value,
-      ram: ram[ram.length - 1].value,
-      disk: disk[disk.length - 1].value,
-      hasAnomaly: anomalyType !== null,
-    })
-  }, [cpu, ram, disk, anomalyType])
+  const displayServers = useMemo(() => {
+    if (!worstGroup) return allHealth
+    return allHealth.filter(h => worstGroup.serverIds.includes(h.server.id))
+  }, [worstGroup, allHealth])
 
-  const currentCpu = useMemo(() =>
-    cpu.length > 0 ? cpu[cpu.length - 1].value : null, [cpu])
-
-  const currentRam = useMemo(() =>
-    ram.length > 0 ? ram[ram.length - 1].value : null, [ram])
-
-  const currentDisk = useMemo(() =>
-    disk.length > 0 ? disk[disk.length - 1].value : null, [disk])
+  const firstHealth = allHealth[0]
 
   const insights = useMemo(() => {
     const list: string[] = []
-    if (currentCpu && currentCpu > 80)
-      list.push(`CPU spike (+${(currentCpu - 55).toFixed(0)}% above baseline)`)
-    if (currentRam && currentRam > 70)
-      list.push(`RAM degradation detected — rising steadily`)
-    if (anomalyType === 'degradation')
-      list.push(`Anomaly density above normal for last 20 min`)
+    const critical = allHealth.filter(h => h.healthScore < 50)
+    const degrading = allHealth.filter(h => h.anomalyType !== null)
+    if (critical.length > 0)
+      list.push(`${critical.map(h => h.server.name).join(', ')} — critical`)
+    if (degrading.length > 0)
+      list.push(`${degrading.map(h => h.server.name).join(', ')} — anomaly detected`)
     if (list.length === 0)
       list.push('All systems operating normally')
     return list
-  }, [currentCpu, currentRam, anomalyType])
+  }, [allHealth])
 
-  const servers = useMemo(() => ([
-    {
-      id: '1',
-      name: 'prod-web-01',
-      healthScore,
-      cpu: currentCpu,
-      ram: currentRam,
-      disk: currentDisk,
-    }
-  ]), [healthScore, currentCpu, currentRam, currentDisk])
-
-  const stableCount = anomalyType === null ? 1 : 0
-  const unstableCount = anomalyType !== null ? 1 : 0
-
-  const getScoreColor = (score: number) => {
-    if (score < 50) return colors.semantic.threat
-    if (score < 75) return colors.semantic.warning
-    return colors.semantic.stable
-  }
+  const stableCount = allHealth.filter(h => h.anomalyType === null && h.healthScore >= 75).length
+  const unstableCount = allHealth.filter(h => h.anomalyType !== null || h.healthScore < 75).length
+  const loading = allHealth.every(h => h.loading)
 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.bg.primary }}
       contentContainerStyle={{ paddingBottom: 30 }}
     >
-      <StabilityHeader stability={healthScore} />
+      <StabilityHeader stability={avgHealthScore} />
 
-      {loading && (
+      {servers.length === 0 && (
+        <View style={{ padding: 18, alignItems: 'center', paddingTop: 40 }}>
+          <Text style={{ color: colors.text.hint, fontSize: 14 }}>No servers added</Text>
+          <Text style={{ color: colors.text.ghost, fontSize: 12, marginTop: 6 }}>
+            Add a server in Settings
+          </Text>
+        </View>
+      )}
+
+      {loading && servers.length > 0 && (
         <View style={{ padding: 18 }}>
           <Text style={{ color: colors.text.muted }}>Loading metrics...</Text>
         </View>
       )}
 
-      {error && (
-        <View style={{ margin: 18, padding: 14, backgroundColor: colors.bg.card, borderRadius: 12, borderWidth: 0.5, borderColor: colors.semantic.threat }}>
-          <Text style={{ color: colors.semantic.threat }}>{error}</Text>
-        </View>
-      )}
-
-      {!loading && !error && (
+      {!loading && servers.length > 0 && (
         <>
-          <View style={{
-            backgroundColor: colors.bg.card,
-            marginHorizontal: 14,
-            borderRadius: 2,
-            paddingVertical: 10,
-            marginBottom: 14,
-            borderWidth: 0.5,
-            borderColor: colors.border,
-            overflow: 'hidden',
-          }}>
-            <MetricChart
-              data={cpu}
-              height={160}
-            />
-          </View>
+        {allHealth.some(h => h.cpu.length > 0) && (
+            <View style={{
+              backgroundColor: colors.bg.card,
+              marginHorizontal: 14,
+              borderRadius: 2,
+              paddingVertical: 10,
+              marginBottom: 14,
+              borderWidth: 0.5,
+              borderColor: colors.border,
+              overflow: 'hidden',
+            }}>
+              <MultiServerChart
+                height={160}
+                servers={allHealth
+                  .filter(h => h.cpu.length > 0)
+                  .map((h, i) => ({
+                    name: h.server.name,
+                    data: h.cpu,
+                    color: '',
+                  }))}
+              />
+            </View>
+          )}
 
           <InsightCard insights={insights} />
 
           <View style={{ marginHorizontal: 14, marginBottom: 14 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-              <Text style={{ fontSize: 15, fontWeight: '500', color: getScoreColor(healthScore) }}>
-                PROD
-              </Text>
-              <Text style={{ fontSize: 15, fontWeight: '500', color: getScoreColor(healthScore) }}>
-                {healthScore}%
+              <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.hint, letterSpacing: 1 }}>
+                {worstGroup ? worstGroup.name : 'SERVERS'}
               </Text>
             </View>
 
-            <ServerMiniChart
-              name="prod-web-01"
-              healthScore={healthScore}
-              cpu={cpu}
-              ram={ram}
-              disk={disk}
-            />
+            {displayServers.map(h => (
+              <TouchableOpacity
+                key={h.server.id}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('Service', {
+                  serverId: h.server.id,
+                  serverName: h.server.name,
+                  serverUrl: h.server.url,
+                })}
+              >
+                <ServerMiniChart
+                  name={h.server.name}
+                  healthScore={h.healthScore}
+                  cpu={h.cpu}
+                  ram={h.ram}
+                  disk={h.disk}
+                />
+              </TouchableOpacity>
+            ))}
           </View>
 
           <CountersBlock

@@ -1,8 +1,9 @@
+import { colors } from '../constants/colours'
 import React, { useState, useCallback } from 'react'
 import { ScrollView, View, Text, TouchableOpacity, Switch, TextInput, Alert } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { colors } from '../constants/colours'
+
 import { useServers } from '../hooks/useServers'
 import { checkConnection } from '../services/prometheus'
 import { Server } from '../constants/types'
@@ -41,6 +42,8 @@ export const SettingsScreen = () => {
   const [newName, setNewName] = useState('')
   const [newUrl, setNewUrl] = useState('')
   const [connStatus, setConnStatus] = useState<'idle' | 'checking' | 'ok' | 'err'>('idle')
+
+
 
   const handleCheckConnection = useCallback(async () => {
     if (!newUrl) return
@@ -476,6 +479,8 @@ export const SettingsScreen = () => {
         ))}
       </View>
 
+      
+
       {/* NOTIFICATIONS */}
       <Text style={{ fontSize: 9, color: colors.text.hint, letterSpacing: 1, paddingHorizontal: 16, marginBottom: 8 }}>NOTIFICATIONS</Text>
       <View style={{
@@ -512,6 +517,13 @@ export const SettingsScreen = () => {
             <Feather name="chevron-right" size={14} color={colors.text.ghost} />
           </View>
         </View>
+      </View>
+      <View style={{ backgroundColor: colors.bg.card, marginHorizontal: 16,
+        borderRadius: 2, borderWidth: 0.5, borderColor: colors.border,
+        marginBottom: 16, overflow: 'hidden', }}>
+        <TouchableOpacity onPress={() => AsyncStorage.clear()}>
+          <Text style={{ fontSize: 12, color: colors.text.primary }}>Reset onboarding</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   )

@@ -1,9 +1,10 @@
+import { colors } from '../constants/colours'
 import React, { useCallback, useMemo, useState } from 'react'
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { Feather } from '@expo/vector-icons'
-import { colors } from '../constants/colours'
+
 import { MapGroupBlock } from '../components/MapGroupBlock'
 import { useServers } from '../hooks/useServers'
 
@@ -11,23 +12,49 @@ import { Server } from '../constants/types'
 import { CompositeNavigationProp } from '@react-navigation/native'
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { RootStackParamList, TabParamList } from '../navigation'
+import { useGroups } from '../hooks/useGroups'
+import { useFocusEffect } from '@react-navigation/native'
+
 
 type NavigationProp = CompositeNavigationProp <
   BottomTabNavigationProp<TabParamList, 'Map'>,
   NativeStackNavigationProp<RootStackParamList>
 >
-
-const GROUPS: Record<string, string[]> = {
-  PROD: ['prod-web-01'],
-  DEV: ['dev-01'],
-}
-
-const ALL_GROUPS = ['All Servers', 'PROD', 'DEV']
-
 export const MapScreen = () => {
   const navigation = useNavigation<NavigationProp>()
-  const { servers } = useServers()
+ 
   const [activeFilter, setActiveFilter] = useState('All Servers')
+
+  const { servers, refresh: refreshServers } = useServers()
+  const { groups, refresh: refreshGroups } = useGroups()
+  
+  useFocusEffect(
+    useCallback(() => {
+      refreshServers()
+      refreshGroups()
+    }, [])
+  )
+  
+  const mappedGroups = useMemo(() => {
+    return groups.map(group => ({
+      name: group.name,
+      servers: servers.filter(s => group.serverIds.includes(s.id)),
+    })).filter(g => g.servers.length > 0)
+  }, [groups, servers])
+
+  const ungrouped = useMemo(() =>
+    servers.filter(s =>
+      !groups.some(g => g.serverIds.includes(s.id))
+    ),
+    [groups, servers]
+  )
+
+  const filteredGroups = useMemo(() => {
+    if (activeFilter === 'All Servers') return mappedGroups
+    return mappedGroups.filter(g => g.name === activeFilter)
+  }, [mappedGroups, activeFilter])
+
+  const allFilterNames = ['All Servers', ...groups.map(g => g.name)]
 
   const handleServerPress = useCallback((server: Server) => {
     navigation.navigate('Service', {
@@ -37,27 +64,8 @@ export const MapScreen = () => {
     })
   }, [navigation])
 
-  const groups = useMemo(() => {
-    return Object.entries(GROUPS).map(([groupName, serverNames]) => ({
-      name: groupName,
-      servers: servers.filter(s => serverNames.includes(s.name)),
-    })).filter(g => g.servers.length > 0)
-  }, [servers])
-
-  const ungrouped = useMemo(() =>
-    servers.filter(s =>
-      !Object.values(GROUPS).flat().includes(s.name)
-    ),
-    [servers]
-  )
-
-  const filteredGroups = useMemo(() => {
-    if (activeFilter === 'All Servers') return groups
-    return groups.filter(g => g.name === activeFilter)
-  }, [groups, activeFilter])
-
   const totalServers = servers.length
-
+  
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.bg.primary }}
@@ -69,22 +77,22 @@ export const MapScreen = () => {
         {/* Filter row */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 20, marginTop: 8, }}>
           <Feather name="filter" size={15} color={colors.text.hint} />
-          {ALL_GROUPS.map((f, i) => (
-            <React.Fragment key={f}>
-              <TouchableOpacity onPress={() => setActiveFilter(f)}>
-                <Text style={{
-                  fontSize: 15,
-                  fontWeight: activeFilter === f ? '400' : '400',
-                  color: activeFilter === f ? colors.text.primary : colors.text.hint,
-                }}>
-                  {f}
-                </Text>
-              </TouchableOpacity>
-              {i < ALL_GROUPS.length - 1 && (
-                <Text style={{ color: colors.text.hint, fontSize: 13 }}>/</Text>
-              )}
-            </React.Fragment>
-          ))}
+          {allFilterNames.map((f, i) => (
+          <React.Fragment key={f}>
+            <TouchableOpacity onPress={() => setActiveFilter(f)}>
+              <Text style={{
+                fontSize: 15,
+                fontWeight: activeFilter === f ? '500' : '400',
+                color: activeFilter === f ? colors.text.primary : colors.text.hint,
+              }}>
+                {f}
+              </Text>
+            </TouchableOpacity>
+            {i < allFilterNames.length - 1 && (
+              <Text style={{ color: colors.text.hint, fontSize: 13 }}>/</Text>
+            )}
+          </React.Fragment>
+        ))}
         </View>
 
         {/* Stats row */}
@@ -119,7 +127,6 @@ export const MapScreen = () => {
         </View>
       </View>
 
-      {/* Groups */}
       <View style={{ paddingHorizontal: 14 }}>
         {filteredGroups.map(group => (
           <MapGroupBlock
@@ -127,18 +134,19 @@ export const MapScreen = () => {
             name={group.name}
             servers={group.servers}
             onServerPress={handleServerPress}
-            defaultExpanded={group.name === 'PROD'}
+            defaultExpanded
           />
         ))}
+
         {ungrouped.length > 0 && activeFilter === 'All Servers' && (
-        <MapGroupBlock
-          key="other"
-          name="OTHER"
-          servers={ungrouped}
-          onServerPress={handleServerPress}
-          defaultExpanded
-        />
-      )}
+          <MapGroupBlock
+            key="ungrouped"
+            name="UNGROUPED"
+            servers={ungrouped}
+            onServerPress={handleServerPress}
+            defaultExpanded
+          />
+        )}
       </View>
     </ScrollView>
   )

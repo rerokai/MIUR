@@ -1,11 +1,11 @@
+import { colors } from '../constants/colours'
 import React, { useState } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { colors } from '../constants/colours'
-import { RootStackParamList } from '../navigation'
 
+import { RootStackParamList } from '../navigation'
 type Nav = NativeStackNavigationProp<RootStackParamList>
 
 const ROLES = [
@@ -45,7 +45,7 @@ export const OnboardingRoleScreen = () => {
               alignItems: 'center',
               gap: 14,
               padding: 16,
-              borderRadius: 12,
+              borderRadius: 2,
               borderWidth: 1,
               borderColor: selected === role.id ? colors.accent : colors.border,
               backgroundColor: selected === role.id ? `${colors.accent}08` : colors.bg.card,
@@ -54,7 +54,7 @@ export const OnboardingRoleScreen = () => {
             <View style={{
               width: 20,
               height: 20,
-              borderRadius: 10,
+              borderRadius: 12,
               borderWidth: 1.5,
               borderColor: selected === role.id ? colors.accent : colors.text.hint,
               alignItems: 'center',
@@ -65,7 +65,7 @@ export const OnboardingRoleScreen = () => {
                 <View style={{
                   width: 10,
                   height: 10,
-                  borderRadius: 5,
+                  borderRadius: 12,
                   backgroundColor: colors.accent,
                 }} />
               )}
@@ -96,7 +96,7 @@ export const OnboardingRoleScreen = () => {
           disabled={!selected}
           style={{
             backgroundColor: selected ? colors.accent : colors.bg.elevated,
-            borderRadius: 12,
+            borderRadius: 2,
             padding: 16,
             alignItems: 'center',
           }}

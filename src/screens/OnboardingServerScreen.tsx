@@ -1,13 +1,13 @@
+import { colors } from '../constants/colours'
 import React, { useState } from 'react'
 import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { colors } from '../constants/colours'
+
 import { RootStackParamList } from '../navigation'
 import { checkConnection } from '../services/prometheus'
 import { Server } from '../constants/types'
-
 type Nav = NativeStackNavigationProp<RootStackParamList>
 
 const INTERVALS = ['15s', '30s', '1m']
@@ -94,7 +94,7 @@ const handleAdd = async () => {
         placeholderTextColor={colors.text.ghost}
         style={{
           backgroundColor: colors.bg.card,
-          borderRadius: 10,
+          borderRadius: 2,
           borderWidth: 0.5,
           borderColor: colors.border,
           padding: 14,
@@ -115,7 +115,7 @@ const handleAdd = async () => {
         keyboardType="url"
         style={{
           backgroundColor: colors.bg.card,
-          borderRadius: 10,
+          borderRadius: 2,
           borderWidth: 0.5,
           borderColor: colors.border,
           padding: 14,
@@ -133,7 +133,7 @@ const handleAdd = async () => {
           alignItems: 'center',
           gap: 8,
           backgroundColor: colors.bg.card,
-          borderRadius: 10,
+          borderRadius: 2,
           borderWidth: 0.5,
           borderColor: colors.border,
           padding: 12,
@@ -141,7 +141,7 @@ const handleAdd = async () => {
         }}
       >
         <View style={{
-          width: 8, height: 8, borderRadius: 4,
+          width: 8, height: 8, borderRadius: 2,
           backgroundColor: connColor,
         }} />
         <Text style={{ fontSize: 12, color: connColor }}>{connText}</Text>
@@ -155,7 +155,7 @@ const handleAdd = async () => {
             key={i}
             onPress={() => setInterval(i)}
             style={{
-              flex: 1, paddingVertical: 10, borderRadius: 10,
+              flex: 1, paddingVertical: 10, borderRadius: 2,
               backgroundColor: interval === i ? `${colors.accent}18` : colors.bg.card,
               borderWidth: 0.5,
               borderColor: interval === i ? `${colors.accent}44` : colors.border,
@@ -180,7 +180,7 @@ const handleAdd = async () => {
             key={p}
             onPress={() => setProfile(p)}
             style={{
-              flex: 1, paddingVertical: 10, borderRadius: 10,
+              flex: 1, paddingVertical: 10, borderRadius: 2,
               backgroundColor: profile === p ? `${colors.accent}18` : colors.bg.card,
               borderWidth: 0.5,
               borderColor: profile === p ? `${colors.accent}44` : colors.border,
@@ -202,7 +202,7 @@ const handleAdd = async () => {
         onPress={handleAdd}
         style={{
           backgroundColor: colors.accent,
-          borderRadius: 12,
+          borderRadius: 2,
           padding: 16,
           alignItems: 'center',
           marginBottom: 12,

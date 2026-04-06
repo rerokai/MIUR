@@ -1,8 +1,9 @@
+import { colors } from '../constants/colours'
 import React, { useMemo } from 'react'
 import { View, Text, Dimensions } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
 import { MetricPoint } from '../constants/types'
-import { colors } from '../constants/colours'
+
 
 interface ServerMiniChartProps {
   cpu: MetricPoint[]
@@ -38,7 +39,7 @@ export const ServerMiniChart = React.memo(({
     disk.slice(-20).map(p => ({ value: parseFloat(p.value.toFixed(1)) })),
     [disk]
   )
-
+  
   const currentCpu = cpu.length > 0 ? cpu[cpu.length - 1].value : null
   const currentRam = ram.length > 0 ? ram[ram.length - 1].value : null
   const currentDisk = disk.length > 0 ? disk[disk.length - 1].value : null

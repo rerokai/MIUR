@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Group } from '../constants/types'
 
 export const useGroups = () => {
   const [groups, setGroups] = useState<Group[]>([])
 
+  
   useEffect(() => {
     const load = async () => {
       try {
@@ -40,5 +41,13 @@ export const useGroups = () => {
     }))
   }
 
-  return { groups, addGroup, removeGroup, toggleServerInGroup }
+const refresh = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem('groups')
+      setGroups(stored ? JSON.parse(stored) : [])
+    } catch {}
+  }, [])
+
+
+  return { groups, addGroup, removeGroup, toggleServerInGroup, refresh }
 }

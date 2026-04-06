@@ -1,12 +1,12 @@
+import { colors } from '../constants/colours'
 import React, { useEffect, useRef } from 'react'
 import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { colors } from '../constants/colours'
+
 import { RootStackParamList } from '../navigation'
 
 type Nav = NativeStackNavigationProp<RootStackParamList>
-
 const { width, height } = Dimensions.get('window')
 
 const BAR_COUNT = 20
@@ -21,12 +21,12 @@ const AnimatedBar = ({ index }: { index: number }) => {
         Animated.delay(index * 80),
         Animated.timing(anim, {
           toValue: 1,
-          duration: 600 + Math.random() * 400,
+          duration: 1000 + Math.random() * 900,
           useNativeDriver: true,
         }),
         Animated.timing(anim, {
           toValue: 0,
-          duration: 600 + Math.random() * 400,
+          duration:1000 + Math.random() * 200,
           useNativeDriver: true,
         }),
       ])
@@ -35,7 +35,7 @@ const AnimatedBar = ({ index }: { index: number }) => {
     return () => loop.stop()
   }, [])
 
-  const barHeight = 40 + (index % 5) * 30
+  const barHeight = 100 + (index % 5) * 70
   const color = index % 3 === 0 ? colors.semantic.threat : index % 3 === 1 ? colors.accent : '#7B61FF'
 
   const scale = anim.interpolate({
@@ -112,7 +112,7 @@ export const OnboardingWelcomeScreen = () => {
           onPress={() => navigation.navigate('OnboardingRole')}
           style={{
             backgroundColor: colors.accent,
-            borderRadius: 12,
+            borderRadius: 2,
             padding: 16,
             alignItems: 'center',
           }}

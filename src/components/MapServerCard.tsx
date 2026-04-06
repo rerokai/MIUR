@@ -1,17 +1,19 @@
+import { colors } from '../constants/colours'
 import React, { useMemo } from 'react'
 import { View, Text, TouchableOpacity, Dimensions } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
-import { colors } from '../constants/colours'
+
 import { usePrometheus } from '../hooks/usePrometheus'
-import { calculateBaseline } from '../utils/analytics'
+
 import { Server } from '../constants/types'
+import { calculateHealthScore, calculateBaseline, detectAnomaly } from '../utils/analytics'
 
 interface MapServerCardProps {
   server: Server
   onPress: () => void
 }
 
-const getScoreColor = (score: number) => {
+const getScoreColor = (score: number, colors:any) => {
   if (score < 50) return colors.semantic.threat
   if (score < 75) return colors.semantic.warning
   return colors.semantic.stable
@@ -21,30 +23,19 @@ const getScoreColor = (score: number) => {
 const MiniChart = React.memo(({ data, color }: { data: { value: number }[], color: string }) => {
   const width = Dimensions.get('window').width - 56
 
-  
   if (data.length === 0) return null
-
-  const avg = data.reduce((sum, p) => sum + p.value, 0) / data.length
-  const baseline = data.map(() => ({ value: avg }))
-  
-  
 
   return (
     <View style={{ marginLeft: -10 }}>
       <LineChart
         data={data}
-        
         width={width}
         height={80}
         color={color}
         thickness={2}
-        
-        
         thickness2={1.2}
         hideDataPoints2
-        
         hideDataPoints
-        
         hideRules={false}
         rulesColor={colors.text.secondary}
         rulesThickness={0.5}
@@ -57,13 +48,10 @@ const MiniChart = React.memo(({ data, color }: { data: { value: number }[], colo
         curved
         disableScroll
         areaChart
-        
-        
         data3={data.map(() => ({ value: data.reduce((s, p) => s + p.value, 0) / data.length }))}
         color3={colors.text.secondary}
         thickness3={0.8}
         hideDataPoints3
-        
         startFillColor={color}
         endFillColor={color}
         startOpacity={0.2}
@@ -79,7 +67,6 @@ const MiniChart = React.memo(({ data, color }: { data: { value: number }[], colo
 
 export const MapServerCard = React.memo(({ server, onPress }: MapServerCardProps) => {
   const { cpu, ram, disk, loading } = usePrometheus(server.url)
-
   const ramData = useMemo(() =>
     ram.slice(-20).map(p => ({ value: parseFloat(p.value.toFixed(1)) })),
     [ram]
@@ -87,17 +74,17 @@ export const MapServerCard = React.memo(({ server, onPress }: MapServerCardProps
 
   const healthScore = useMemo(() => {
     if (!cpu.length || !ram.length || !disk.length) return 0
-    const c = cpu[cpu.length - 1].value
-    const r = ram[ram.length - 1].value
-    const d = disk[disk.length - 1].value
-    return Math.round(
-      Math.max(0, 100 - c) * 0.4 +
-      Math.max(0, 100 - r) * 0.3 +
-      Math.max(0, 100 - d) * 0.2
-    )
+    const baseline = calculateBaseline(cpu)
+    const anomalyType = detectAnomaly(cpu, baseline)
+    return calculateHealthScore({
+      cpu: cpu[cpu.length - 1].value,
+      ram: ram[ram.length - 1].value,
+      disk: disk[disk.length - 1].value,
+      hasAnomaly: anomalyType !== null,
+    })
   }, [cpu, ram, disk])
 
-  const scoreColor = getScoreColor(healthScore)
+  const scoreColor = getScoreColor(healthScore, colors)
 
   const chartData = useMemo(() =>
     cpu.slice(-20).map(p => ({ value: parseFloat(p.value.toFixed(1)) })),

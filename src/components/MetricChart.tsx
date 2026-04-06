@@ -1,8 +1,9 @@
+import { colors } from '../constants/colours'
 import React, { useMemo } from 'react'
 import { View, Text, Dimensions } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
 import { MetricPoint } from '../constants/types'
-import { colors } from '../constants/colours'
+
 
 interface MetricChartProps {
   data: MetricPoint[]
@@ -12,7 +13,6 @@ interface MetricChartProps {
 
 export const MetricChart = React.memo(({ data, height = 180, data2 }: MetricChartProps) => {
   const width = Dimensions.get('window').width - 36
-
   const sliced = useMemo(() => {
     if (data.length <= 7) return data
     const step = Math.floor(data.length / 7)

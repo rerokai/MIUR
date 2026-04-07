@@ -45,12 +45,16 @@ export const queryRange = async (
 }
 
 export const checkConnection = async (baseUrl: string): Promise<boolean> => {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 5000)
   try {
     const response = await fetch(`${baseUrl}/api/v1/query?query=up`, {
-      signal: AbortSignal.timeout(5000),
+      signal: controller.signal,
     })
+    clearTimeout(timeoutId)
     return response.ok
   } catch {
+    clearTimeout(timeoutId)
     return false
   }
 }

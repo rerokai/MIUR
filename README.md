@@ -1,22 +1,17 @@
 <div align="center">
 
 ```
-███╗   ███╗██╗██╗   ██╗██████╗
-████╗ ████║██║██║   ██║██╔══██╗
-██╔████╔██║██║██║   ██║██████╔╝
-██║╚██╔╝██║██║██║   ██║██╔══██╗
-██║ ╚═╝ ██║██║╚██████╔╝██║  ██║
-╚═╝     ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝
+   ███╗   ███╗ ██╗ ██╗   ██╗ ██████╗
+    ████╗ ████║ ██║ ██║   ██║ ██╔══██╗
+    ██╔████╔██║ ██║ ██║   ██║ ██████╔╝
+    ██║╚██╔╝██║ ██║ ██║   ██║ ██╔══██╗
+    ██║ ╚═╝ ██║ ██║ ╚██████╔╝ ██║  ██║
+    ╚═╝     ╚═╝ ╚═╝  ╚═════╝  ╚═╝  ╚═╝
 ```
 
 **Monitoring Infrastructure, Unified & Reactive**
 
 *Real-time server monitoring for your pocket*
-
-![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-black?style=flat-square)
-![Built with](https://img.shields.io/badge/built%20with-React%20Native%20%2B%20Expo-00F6FF?style=flat-square)
-![Data source](https://img.shields.io/badge/data-Prometheus-E6522C?style=flat-square)
-![Language](https://img.shields.io/badge/language-TypeScript-3178C6?style=flat-square)
 
 </div>
 
